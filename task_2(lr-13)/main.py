@@ -1,145 +1,146 @@
-# -*- coding: utf-8 -*-  # Указываем кодировку файла, чтобы поддерживалась кириллица
-import dearpygui.dearpygui as dpg  # Импортируем библиотеку DearPyGui
-from transport import Client, Airplane, Van, TransportCompany  # Импортируем классы из пакета transport
-from task_3(lr-13_)import *
-company = TransportCompany("Белтранс")  # Создаём объект транспортной компании
+# -*- coding: utf-8 -*-  # указываем кодировку файла, чтобы поддерживалась кириллица
+import dearpygui.dearpygui as dpg
+from transport import Client, Airplane, Van, TransportCompany
+from task_3(lr-13_) import *
 
-def log_message(msg: str):  # Функция для вывода сообщений в окно "Вывод"
-    dpg.set_value("output_text", msg)  # Устанавливаем текст в элемент с тегом output_text
+company = TransportCompany("Белтранс")
 
-# --- Callbacks ---
-def show_clients_callback(sender, app_data):  # Колбэк для кнопки "Вывести записи клиентов"
-    if company.clients:  # Если список клиентов не пуст
-        text = "\n".join(str(c) for c in company.clients)  # Формируем строку со всеми клиентами
-        log_message(text)  # Выводим её в окно "Вывод"
+def log_message(msg: str):
+    dpg.set_value("output_text", msg)
+
+# --- callbacks ---
+def show_clients_callback(sender, app_data): # колбэк для кнопки "Вывести записи клиентов"
+    if company.clients:
+        text = "\n".join(str(c) for c in company.clients)
+        log_message(text)
     else:
-        log_message("Список клиентов пуст.")  # Если клиентов нет, выводим сообщение
+        log_message("список клиентов пуст.")
 
-def show_vehicles_callback(sender, app_data):  # Колбэк для кнопки "Вывести список транспорта"
-    if company.vehicles:  # Если список транспорта не пуст
-        text = "\n".join(str(v) for v in company.vehicles)  # Формируем строку со всеми транспортами
-        log_message(text)  # Выводим её
+def show_vehicles_callback(sender, app_data):
+    if company.vehicles:
+        text = "\n".join(str(v) for v in company.vehicles)
+        log_message(text)
     else:
-        log_message("Список транспорта пуст.")  # Если транспорта нет, выводим сообщение
+        log_message("список транспорта пуст.")
 
-def add_client_callback(sender, app_data):  # Колбэк для добавления клиента
-    name = dpg.get_value("client_name").strip()  # Получаем имя клиента из поля ввода
-    if not name:  # Проверяем, что имя не пустое
-        log_message("Ошибка: имя клиента не может быть пустым.")  # Сообщаем об ошибке
-        return
-    try:
-        weight = float(dpg.get_value("client_weight"))  # Получаем вес груза и преобразуем в число
-    except (TypeError, ValueError):
-        log_message("Ошибка: вес должен быть числом.")  # Если ошибка преобразования, выводим сообщение
-        return
-    vip = bool(dpg.get_value("client_vip"))  # Получаем статус VIP из чекбокса
-    try:
-        company.add_client(Client(name, weight, vip))  # Создаём клиента и добавляем в компанию
-    except Exception as e:
-        log_message(f"Ошибка добавления клиента: {e}")  # Если ошибка, выводим её
-        return
-    log_message(f"Клиент {name} добавлен.")  # Сообщаем об успешном добавлении
-
-def delete_client_callback(sender, app_data):  # Колбэк для удаления клиента
-    name = dpg.get_value("delete_client_name").strip()  # Получаем имя клиента для удаления
+def add_client_callback(sender, app_data): # колбэк для добавления клиента
+    name = dpg.get_value("client_name").strip()
     if not name:
-        log_message("Введите имя клиента для удаления.")  # Если пустое имя, выводим сообщение
+        log_message("ошибка: имя клиента не может быть пустым.")
         return
-    found = False  # Флаг найденного клиента
-    for c in list(company.clients):  # Перебираем список клиентов
-        if c.name == name:  # Если имя совпадает
-            company.clients.remove(c)  # Удаляем клиента
-            log_message(f"Клиент {name} удалён.")  # Сообщаем об удалении
+    try:
+        weight = float(dpg.get_value("client_weight"))
+    except (TypeError, ValueError):
+        log_message("ошибка: вес должен быть числом.")
+        return
+    vip = bool(dpg.get_value("client_vip"))
+    try:
+        company.add_client(Client(name, weight, vip))
+    except Exception as e:
+        log_message(f"ошибка добавления клиента: {e}")
+        return
+    log_message(f"клиент {name} добавлен.")
+
+def delete_client_callback(sender, app_data): # колбэк для удаления клиента
+    name = dpg.get_value("delete_client_name").strip()
+    if not name:
+        log_message("введите имя клиента для удаления.")
+        return
+    found = False
+    for c in list(company.clients):
+        if c.name == name:
+            company.clients.remove(c)
+            log_message(f"клиент {name} удалён.")
             found = True
             break
     if not found:
-        log_message(f"Клиент {name} не найден.")  # Если клиент не найден, выводим сообщение
+        log_message(f"клиент {name} не найден.")
 
-def optimize_callback(sender, app_data):  # Колбэк для распределения грузов
+def optimize_callback(sender, app_data): # колбэк для распределения грузов
     try:
-        result = company.optimize_cargo_distribution()  # Запускаем оптимизацию
+        result = company.optimize_cargo_distribution()
     except Exception as e:
-        log_message(f"Ошибка распределения: {e}")  # Если ошибка, выводим её
+        log_message(f"ошибка распределения: {e}")
         return
-    log_message(result)  # Выводим результат оптимизации
+    log_message(result)
 
-def add_airplane_callback(sender, app_data):  # Колбэк для добавления самолёта
+def add_airplane_callback(sender, app_data): # колбэк для добавления самолёта
     try:
-        cap = float(dpg.get_value("airplane_capacity"))  # Получаем грузоподъёмность
-        alt = int(dpg.get_value("airplane_altitude"))    # Получаем высоту и приводим к целому числу
+        cap = float(dpg.get_value("airplane_capacity"))
+        alt = int(dpg.get_value("airplane_altitude"))
     except (TypeError, ValueError):
-        log_message("Ошибка: грузоподъёмность и высота должны быть числами.")  # Сообщаем об ошибке
+        log_message("ошибка: грузоподъёмность и высота должны быть числами.")
         return
     try:
-        company.add_vehicle(Airplane(cap, alt))  # Создаём самолёт и добавляем в компанию
+        company.add_vehicle(Airplane(cap, alt))
     except Exception as e:
-        log_message(f"Ошибка добавления самолёта: {e}")  # Если ошибка, выводим её
+        log_message(f"ошибка добавления самолёта: {e}")
         return
-    log_message("Самолёт добавлен.")  # Сообщаем об успешном добавлении
+    log_message("самолёт добавлен.")
 
-def add_van_callback(sender, app_data):  # Колбэк для добавления фургона
+def add_van_callback(sender, app_data):# колбэк для добавления фургона
     try:
-        cap = float(dpg.get_value("van_capacity"))  # Получаем грузоподъёмность
+        cap = float(dpg.get_value("van_capacity"))
     except (TypeError, ValueError):
-        log_message("Ошибка: грузоподъёмность должна быть числом.")  # Сообщаем об ошибке
+        log_message("ошибка: грузоподъёмность должна быть числом.")
         return
-    refr = bool(dpg.get_value("van_refrigerator"))  # Получаем наличие холодильника
+    refr = bool(dpg.get_value("van_refrigerator"))
     try:
-        company.add_vehicle(Van(cap, refr))  # Создаём фургон и добавляем в компанию
+        company.add_vehicle(Van(cap, refr))
     except Exception as e:
-        log_message(f"Ошибка добавления фургона: {e}")  # Если ошибка, выводим её
+        log_message(f"ошибка добавления фургона: {e}")
         return
-    log_message("Фургон добавлен.")  # Сообщаем об успешном добавлении
+    log_message("фургон добавлен.")
 
-# --- GUI ---
-dpg.create_context()  # Создаём контекст DearPyGui
+# --- gui ---
+dpg.create_context()
 
-# Подключаем шрифт с поддержкой кириллицы
-with dpg.font_registry():  # Регистрируем шрифты
-    with dpg.font("D:/python/ipo-lr-12/DejaVuSans.ttf", 16) as default_font:  # Загружаем DejaVuSans.ttf
-        dpg.add_font_range_hint(dpg.mvFontRangeHint_Cyrillic)  # Включаем поддержку кириллицы
-dpg.bind_font(default_font)  # Привязываем шрифт как основной
+# подключение шрифта с поддержкой кириллицы
+with dpg.font_registry():
+    with dpg.font("D:/python/ipo-lr-12/DejaVuSans.ttf", 16) as default_font:
+        dpg.add_font_range_hint(dpg.mvFontRangeHint_Cyrillic)
+dpg.bind_font(default_font)
 
-# Главное окно управления
-with dpg.window(label="Управление транспортной компанией", width=600, height=680, pos=(0, 0)):  # Создаём окно управления
-    dpg.add_text("Меню управления")  # Заголовок окна
-
-    dpg.add_button(label="Вывести записи клиентов", callback=show_clients_callback)  # Кнопка для вывода клиентов
-    dpg.add_button(label="Вывести список транспорта", callback=show_vehicles_callback)  # Кнопка для вывода транспорта
-
-    dpg.add_separator()  # Разделитель
-    dpg.add_input_text(label="Имя клиента", tag="client_name", width=250)  # Поле ввода имени клиента
-    dpg.add_input_text(label="Вес груза (тонн)", tag="client_weight", width=250)  # Поле ввода веса груза
-    dpg.add_checkbox(label="VIP клиент", tag="client_vip")  # Чекбокс для VIP
-    dpg.add_button(label="Добавить клиента", callback=add_client_callback)  # Кнопка добавления клиента
-
+# главное окно управления
+with dpg.window(label="управление транспортной компанией", width=600, height=680, pos=(0, 0)):
+    dpg.add_text("меню управления")
+    dpg.add_button(label="вывести записи клиентов", callback=show_clients_callback)
+    dpg.add_button(label="вывести список транспорта", callback=show_vehicles_callback)
+    
     dpg.add_separator()
-    dpg.add_input_text(label="Имя клиента для удаления", tag="delete_client_name", width=250)  # Поле ввода имени для удаления
-    dpg.add_button(label="Удалить клиента", callback=delete_client_callback)  # Кнопка удаления клиента
-
+    dpg.add_input_text(label="имя клиента", tag="client_name", width=250)
+    dpg.add_input_text(label="вес груза (тонн)", tag="client_weight", width=250)
+    dpg.add_checkbox(label="vip клиент", tag="client_vip")
+    dpg.add_button(label="добавить клиента", callback=add_client_callback)
+    
     dpg.add_separator()
-    dpg.add_button(label="Распределить грузы", callback=optimize_callback)  # Кнопка распределения грузов
-    dpg.add_button(label="Сохранить результаты в файл", callback=save_results_callback)  # Новая кнопка сохранения результатов
-
+    dpg.add_input_text(label="имя клиента для удаления", tag="delete_client_name", width=250)
+    dpg.add_button(label="удалить клиента", callback=delete_client_callback)
+    
     dpg.add_separator()
-    dpg.add_input_text(label="Грузоподъёмность самолёта", tag="airplane_capacity", width=250)  # Поле ввода грузоподъёмности самолёта
-    dpg.add_input_text(label="Макс. высота полёта (м)", tag="airplane_altitude", width=250)  # Поле ввода высоты полёта
-    dpg.add_button(label="Добавить самолёт", callback=add_airplane_callback)  # Кнопка добавления самолёта
-
+    dpg.add_button(label="распределить грузы", callback=optimize_callback)
+    dpg.add_button(label="сохранить результаты в файл", callback=save_results_callback)
+    
     dpg.add_separator()
-    dpg.add_input_text(label="Грузоподъёмность фургона", tag="van_capacity", width=250)  # Поле ввода грузоподъёмности фургона
-    dpg.add_checkbox(label="Есть холодильник", tag="van_refrigerator")  # Чекбокс наличия холодильника
-    dpg.add_button(label="Добавить фургон", callback=add_van_callback)  # Кнопка добавления фургона
+    dpg.add_input_text(label="грузоподъёмность самолёта", tag="airplane_capacity", width=250)
+    dpg.add_input_text(label="макс. высота полёта (м)", tag="airplane_altitude", width=250)
+    dpg.add_button(label="добавить самолёт", callback=add_airplane_callback)
+    
+    dpg.add_separator()
+    dpg.add_input_text(label="грузоподъёмность фургона", tag="van_capacity", width=250)
+    dpg.add_checkbox(label="есть холодильник", tag="van_refrigerator")
+    dpg.add_button(label="добавить фургон", callback=add_van_callback)
 
-# Окно вывода результатов
-with dpg.window(label="Вывод", width=620, height=680, pos=(620, 0)):  # Создаём окно для вывода сообщений
-    dpg.add_text("Здесь будут результаты", tag="output_text", wrap=600)  # Текстовый элемент для отображения логов
+# окно вывода результатов
+with dpg.window(label="вывод", width=620, height=680, pos=(620, 0)):
+    dpg.add_text("здесь будут результаты", tag="output_text", wrap=600)
 
 # Viewport и цикл приложения
-dpg.create_viewport(title="Белтранс GUI", width=1260, height=720)  # Создаём окно приложения
-dpg.setup_dearpygui()  # Настраиваем DearPyGui
-dpg.show_viewport()    # Показываем окно
-dpg.start_dearpygui()  # Запускаем главный цикл приложения
-dpg.destroy_context()  # Уничтожаем контекст после закрытия
+dpg.create_viewport(title="Белтранс GUI", width=1260, height=720)  # создаём окно приложения
+dpg.setup_dearpygui()  # настраиваем DearPyGui
+dpg.show_viewport()    # показываем окно
+dpg.start_dearpygui()  # запускаем главный цикл приложения
+dpg.destroy_context()  # кничтожаем контекст после закрытия
+
 
 
