@@ -5,5 +5,4 @@ class Client:#создаём класс клиент
         self.is_vip = is_vip#статус VIP (по умолчанию False)
 
     def __repr__(self):#создаём метод репр чтобы удобно выводить объект в консоль
-        return (f"Client(name={self.name}, cargo_weight={self.cargo_weight}, "
-                f"is_vip={self.is_vip})")
+         return f"Клиент {self.name}, груз: {self.cargo_weight} тонн, VIP: {self.is_vip}"
