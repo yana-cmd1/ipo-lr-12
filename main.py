@@ -1,239 +1,105 @@
-import os
-import sys
+#Дмитрук Яны
+from transport import Client, Vehicle, Airplane, Van, TransportCompany  # импортируем все классы из пакета transport
 
-# Добавляем текущую директорию в путь Python
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+def main():  # определяем главную функцию программы
+    company = TransportCompany("Белтранс")   
 
-# Импортируем классы напрямую из файлов
-try:
-    # Способ 1: Импорт из папки transport
-    from transport.client import Client
-    from transport.vehicle import Vehicle
-    from transport.van import Van
-    from transport.ship import Ship
-    from transport.company import TransportCompany
-except ImportError:
-    # Способ 2: Если transport как пакет не работает, создаем классы прямо здесь
-    print("Использую встроенные классы...")
-    
-    class Client:
-        def __init__(self, name: str, cargo_weight: float, is_vip: bool = False):
-            self.name = name
-            self.cargo_weight = cargo_weight
-            self.is_vip = is_vip
-        
-        def __str__(self):
-            vip = "VIP" if self.is_vip else "обычный"
-            return f"Клиент: {self.name}, Груз: {self.cargo_weight}т, Статус: {vip}"
-    
-    class Vehicle:
-        def __init__(self, capacity: float):
-            import random
-            import string
-            self.vehicle_id = 'V' + ''.join(random.choice(string.ascii_uppercase) for _ in range(5))
-            self.capacity = capacity
-            self.current_load = 0.0
-            self.clients_list = []
-        
-        def load_cargo(self, client):
-            if self.current_load + client.cargo_weight <= self.capacity:
-                self.current_load += client.cargo_weight
-                self.clients_list.append(client)
-                return True
-            return False
-        
-        def __str__(self):
-            return f"Транспорт ID: {self.vehicle_id}, Грузоподъемность: {self.capacity}т"
-    
-    class Van(Vehicle):
-        def __init__(self, capacity: float, is_refrigerated: bool = False):
-            super().__init__(capacity)
-            self.is_refrigerated = is_refrigerated
-        
-        def __str__(self):
-            fridge = "с холодильником" if self.is_refrigerated else "без холодильника"
-            return f"Фургон {fridge}, {super().__str__()}"
-    
-    class Ship(Vehicle):
-        def __init__(self, capacity: float, name: str):
-            super().__init__(capacity)
-            self.name = name
-        
-        def __str__(self):
-            return f"Судно '{self.name}', {super().__str__()}"
-    
-    class TransportCompany:
-        def __init__(self, name: str):
-            self.name = name
-            self.vehicles = []
-            self.clients = []
-        
-        def add_vehicle(self, vehicle):
-            self.vehicles.append(vehicle)
-            return True
-        
-        def add_client(self, client):
-            self.clients.append(client)
-            return True
-        
-        def optimize_cargo_distribution(self):
-            print("\n=== ОПТИМИЗАЦИЯ РАСПРЕДЕЛЕНИЯ ГРУЗОВ ===")
-            # Сбрасываем загрузку
-            for v in self.vehicles:
-                v.current_load = 0
-                v.clients_list = []
-            
-            # Загружаем VIP клиентов
-            vip_clients = [c for c in self.clients if c.is_vip]
-            for client in vip_clients:
-                loaded = False
-                for vehicle in self.vehicles:
-                    if vehicle.load_cargo(client):
-                        print(f"✓ VIP {client.name} загружен в {vehicle.vehicle_id}")
-                        loaded = True
-                        break
-                if not loaded:
-                    print(f"✗ Не удалось загрузить VIP {client.name}")
-            
-            # Загружаем обычных клиентов
-            regular_clients = [c for c in self.clients if not c.is_vip]
-            for client in regular_clients:
-                loaded = False
-                for vehicle in self.vehicles:
-                    if vehicle.load_cargo(client):
-                        print(f"✓ {client.name} загружен в {vehicle.vehicle_id}")
-                        loaded = True
-                        break
-                if not loaded:
-                    print(f"✗ Не удалось загрузить {client.name}")
-            
-            print(f"\nИспользовано транспорта: {sum(1 for v in self.vehicles if v.clients_list)} из {len(self.vehicles)}")
+    while True:  
+        print("\nМеню:")  # выводим заголовок меню
+        print("1. Вывести все записи клиентов")  # пункт меню для вывода клиентов
+        print("2. Вывести весь список транспорта (ID и грузоподъёмность)")  # пункт меню для вывода транспорта
+        print("3. Добавить запись клиента")  # пункт меню для добавления клиента
+        print("4. Удалить запись клиента по имени")  # пункт меню для удаления клиента
+        print("5. Выполнить распределение грузов")  # пункт меню для оптимизации распределения
+        print("6. Вывести подробную информацию о транспорте")  # пункт меню для подробного вывода транспорта
+        print("7. Добавить транспортное средство")  # пункт меню для добавления транспорта
+        print("8. Выйти из программы")  # пункт меню для выхода
 
+        choice = input("Выберите пункт меню: ")  # считываем выбор пользователя
 
-def main():
-    """Главное меню"""
-    company = None
-    
-    while True:
-        print("\n" + "="*50)
-        print("ТРАНСПОРТНАЯ КОМПАНИЯ")
-        print("="*50)
-        if company:
-            print(f"Компания: {company.name}")
-        print("1. Создать компанию")
-        print("2. Добавить клиента")
-        print("3. Добавить транспорт")
-        print("4. Показать клиентов")
-        print("5. Показать транспорт")
-        print("6. Оптимизировать грузы")
-        print("7. Тестовые данные")
-        print("0. Выход")
-        print("="*50)
-        
-        choice = input("Выберите: ")
-        
-        if choice == '0':
-            break
-        
-        elif choice == '1':
-            name = input("Название компании: ")
-            company = TransportCompany(name)
-            print(f" Компания '{name}' создана!")
-        
-        elif choice == '2':
-            if not company:
-                print(" Сначала создайте компанию!")
-                continue
-            
-            name = input("Имя клиента: ")
-            weight = float(input("Вес груза (т): "))
-            vip = input("VIP? (y/n): ").lower() == 'y'
-            
-            client = Client(name, weight, vip)
-            company.add_client(client)
-            print(f" Клиент {name} добавлен!")
-        
-        elif choice == '3':
-            if not company:
-                print(" Сначала создайте компанию!")
-                continue
-            
-            print("Тип транспорта:")
-            print("1. Фургон")
-            print("2. Судно")
-            print("3. Обычный транспорт")
-            type_choice = input("Выберите: ")
-            
-            capacity = float(input("Грузоподъемность (т): "))
-            
-            if type_choice == '1':
-                fridge = input("Холодильник? (y/n): ").lower() == 'y'
-                vehicle = Van(capacity, fridge)
-            elif type_choice == '2':
-                name = input("Название судна: ")
-                vehicle = Ship(capacity, name)
+        if choice == "1":  # если выбрали пункт 1
+            if company.clients:  # проверяем, есть ли клиенты
+                for c in company.clients:  # перебираем всех клиентов
+                    print(c)  # выводим клиента (используется __str__)
             else:
-                vehicle = Vehicle(capacity)
-            
-            company.add_vehicle(vehicle)
-            print(f" Транспорт добавлен! ID: {vehicle.vehicle_id}")
-        
-        elif choice == '4':
-            if not company or not company.clients:
-                print(" Нет клиентов!")
+                print("Список клиентов пуст.")  # если клиентов нет
+
+        elif choice == "2":  # если выбрали пункт 2
+            if company.vehicles:  # проверяем, есть ли транспорт
+                for v in company.list_vehicles():  # перебираем транспорт
+                    print(f"ID: {v.vehicle_id}, грузоподъёмность: {v.capacity} тонн")  # краткая информация
             else:
-                print(f"\n Клиенты ({len(company.clients)}):")
-                for client in company.clients:
-                    print(f"  • {client}")
-        
-        elif choice == '5':
-            if not company or not company.vehicles:
-                print(" Нет транспорта!")
+                print("Список транспорта пуст.")  # если транспорта нет
+
+        elif choice == "3":  # если выбрали пункт 3
+            name = input("Введите имя клиента: ")  # вводим имя клиента
+            try:
+                weight = float(input("Введите вес груза: "))  # вводим вес груза и преобразуем в число
+            except ValueError:  # если введено не число
+                print("Ошибка: вес должен быть числом.")  # сообщение об ошибке
+                continue  # возвращаемся в меню
+            vip = input("VIP клиент? (y/n): ").lower() == "y"  # определяем VIP-статус
+            company.add_client(Client(name, weight, vip))  # добавляем клиента в компанию
+            print("Клиент добавлен.")  # сообщаем об успешном добавлении
+
+        elif choice == "4":  # если выбрали пункт 4
+            name = input("Введите имя клиента для удаления: ")  # вводим имя клиента
+            found = False  # флаг найденного клиента
+            for c in company.clients:  # перебираем всех клиентов
+                if c.name == name:  # если имя совпадает
+                    company.clients.remove(c)  # удаляем клиента
+                    print(f"Клиент {name} удалён.")  # сообщаем об удалении
+                    found = True  # меняем флаг
+                    break  # прерываем цикл
+            if not found:  # если клиент не найден
+                print(f"Клиент {name} не найден.")  # сообщаем об этом
+
+        elif choice == "5":  # если выбрали пункт 5
+            company.optimize_cargo_distribution()  # запускаем оптимизацию распределения грузов
+            print("Распределение грузов выполнено.")  # сообщаем об успешном выполнении
+
+        elif choice == "6":  # если выбрали пункт 6
+            if company.vehicles:  # проверяем, есть ли транспорт
+                for v in company.list_vehicles():  # перебираем транспорт
+                    print(v)  # выводим подробную информацию (__str__)
             else:
-                print(f"\n Транспорт ({len(company.vehicles)}):")
-                for vehicle in company.vehicles:
-                    print(f"  • {vehicle}")
-        
-        elif choice == '6':
-            if not company:
-                print(" Сначала создайте компанию!")
-            elif not company.clients:
-                print(" Нет клиентов!")
-            elif not company.vehicles:
-                print(" Нет транспорта!")
+                print("Список транспорта пуст.")  # если транспорта нет
+
+        elif choice == "7":  # если выбрали пункт 7
+            print("Выберите тип транспорта:")  # предлагаем выбрать тип
+            print("1. Airplane (самолёт)")  # вариант самолёт
+            print("2. Van (фургон)")  # вариант фургон
+            t_choice = input("Ваш выбор: ")  # считываем выбор
+
+            if t_choice == "1":  # если выбрали самолёт
+                try:
+                    cap = float(input("Введите грузоподъёмность: "))  # вводим грузоподъёмность
+                    alt = int(input("Введите максимальную высоту полёта: "))  # вводим высоту полёта
+                except ValueError:  # если введено не число
+                    print("Ошибка: грузоподъёмность и высота должны быть числами.")  # сообщение об ошибке
+                    continue  # возвращаемся в меню
+                company.add_vehicle(Airplane(cap, alt))  # добавляем самолёт
+                print("Транспорт Airplane добавлен.")  # сообщаем об успешном добавлении
+
+            elif t_choice == "2":  # если выбрали фургон
+                try:
+                    cap = float(input("Введите грузоподъёмность: "))  # вводим грузоподъёмность
+                except ValueError:  # если введено не число
+                    print("Ошибка: грузоподъёмность должна быть числом.")  # сообщение об ошибке
+                    continue  # возвращаемся в меню
+                refr = input("Есть холодильник? (y/n): ").lower() == "y"  # определяем наличие холодильника
+                company.add_vehicle(Van(cap, refr))  # добавляем фургон
+                print("Транспорт Van добавлен.")  # сообщаем об успешном добавлении
+
             else:
-                company.optimize_cargo_distribution()
-        
-        elif choice == '7':
-            if not company:
-                company = TransportCompany("Тестовая компания")
-            
-            # Тестовые данные
-            clients = [
-                Client("Иванов Иван", 5.0, True),
-                Client("Петров Петр", 3.0),
-                Client("Сидорова Анна", 8.0, True),
-                Client("Кузнецов Алексей", 2.0),
-                Client("Смирнова Мария", 4.5),
-            ]
-            
-            vehicles = [
-                Van(10.0, True),
-                Ship(15.0, "Морской волк"),
-                Vehicle(8.0),
-            ]
-            
-            for client in clients:
-                company.add_client(client)
-            
-            for vehicle in vehicles:
-                company.add_vehicle(vehicle)
-            
-            print(" Тестовые данные загружены!")
-        
+                print("Неверный выбор типа транспорта.")  # если ввели неправильный вариант
+
+        elif choice == "8":  # если выбрали пункт 8
+            print("Выход из программы.")  # сообщаем о выходе
+            break  # прерываем цикл и завершаем программу
+
         else:
-            print(" Неверный выбор!")
+            print("Неверный выбор, попробуйте снова.")  # если ввели неправильный пункт
 
-
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # проверяем, что файл запущен напрямую
+    main()  # запускаем главную функцию
